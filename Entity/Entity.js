@@ -1,11 +1,16 @@
-import EntityManager from engine;
-import Vector from engine.util;
-import Graphic from engine.graphic;
+import EntityManager, App from engine;
+import Vector, Mask from engine.util;
+import Graphic, Sprite from engine.graphic;
+
+import Mouse, Keyboard from engine.inputs;
 
 class Entity extends EntityManager {
   constructor() {
     super();
 
+    this.graphic = new Graphic;
+
+    this.listenMethods = {};
     this.updateMethods = {
       update: true
     }; //Append and delete methods to execute every frame
@@ -22,8 +27,29 @@ class Entity extends EntityManager {
 
   }
 
+  beforeUpdate() {
+
+  }
+
+  afterUpdate() {
+    
+  }
+
+  listenMouseOnMask() {
+    if (Mouse.moved) {
+      this.mouseWasOnMask = this.isMouseOnMask;
+      this.isMouseOnMask = this.mask.pointIntersect(Mouse.pos, this.graphic);
+
+      this.mouseEnteredMask = this.isMouseOnMask && !this.mouseWasOnMask;
+      this.mouseLeavedMask = !this.isMouseOnMask && this.mouseWasOnMask;
+    }
+  }
+
+
+
   setMoveToPosition(pos, speed) {
     this.moveToPos = pos;
+    this.moveToPosSpeed = new Vector;
     const direction = this.pos.directionTo(this.moveToPos);
     this.moveToPosSpeed.setNorme(speed).setDirection(direction);
 
@@ -33,13 +59,11 @@ class Entity extends EntityManager {
   }
 
   applyMoveToPosition() {
-    if (!this.moveToPos) return this;
-
     const distance = this.pos.distanceToPoint(this.moveToPos);
-    const speedPerFrame = this.moveToPosSpeed.copy.div(Game.game.fps);
+    const speedPerFrame = this.moveToPosSpeed.copy.div(App.fps);
 
     (distance > speedPerFrame.norme) && this.pos.add(speedPerFrame)
-    || this.pos.setTo(this.moveToPos) && (this.moveToPos = null) && (delete this.updateMethods.applyMoveToPosition);
+    || this.pos.setTo(this.moveToPos) && (delete this.updateMethods.applyMoveToPosition);
   }
 
   setSpeed(speed) {
@@ -52,5 +76,13 @@ class Entity extends EntityManager {
 
   applySpeed() {
     this.pos.add(this.speed);
+  }
+
+  createSprite(image) {
+    this.sprite = new Sprite(image);
+  }
+
+  createMask(image) {
+    this.mask = new Mask(image);
   }
 }

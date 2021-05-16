@@ -10,6 +10,7 @@ class Vector {
     return table;
   }
 
+
   constructor(x, y) {
     this.x = x || 0;
     this.y = y || 0;
@@ -21,6 +22,10 @@ class Vector {
 
   isNull() {
     return this.x === 0 && this.y === 0;
+  }
+
+  isInRange(min, max) {
+    return this.x>=min && this.x<=max && this.y>=min && this.y<=max;
   }
 
   setX(value) {

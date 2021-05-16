@@ -5,16 +5,25 @@ class EntityManager {
   static _activeInstances = {};
 
   static get instances() {
-    return (this.name === 'Entity') && this._instances || this[this.name + 'Instances'];
+    return (this.name === 'EntityManager' || this.name === 'Entity') && this._instances || this[this.name + 'Instances'];
+  }
+
+  static destroyInstance(id) {
+    delete EntityManager._instances[id];
+    delete this.instances[id];
   }
 
   constructor() {
-    this.id = ++EntityManager.count;
+    this.id = EntityManager.count++;
 
     EntityManager.instances[this.id] = this;
 
 
     (EntityManager[this.constructor.name + 'Instances'] || (EntityManager[this.constructor.name + 'Instances'] = {}))[this.id] = this;
+  }
+
+  destroy() {
+    this.constructor.destroyInstance(this.id);
   }
 
   get pos() {
@@ -104,7 +113,7 @@ class EntityManager {
   }
 
   setSprite(sprite) {
-    this.sprite = sprite;
+    this.graphic.sprite = sprite;
     return this;
   }
 

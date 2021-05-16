@@ -1,7 +1,9 @@
 import Vector from engine.util;
 
 class Graphic {
-  constructor({ pos = new Vector, offset = new Vector, origin = new Vector, scale = new Vector(1,1), rotation = 0, view = View.first, sprite = null }) {
+  constructor(params = {}) {
+    const { pos = new Vector, offset = new Vector, origin = new Vector, scale = new Vector(1,1), rotation = 0, view = null, sprite = null } = params;
+
     this.pos = pos;
     this.offset = offset;
     this.origin = origin;
@@ -12,6 +14,7 @@ class Graphic {
   }
 
   draw() {
-    this.sprite && this.sprite.nextFrame() && this.view.drawGraphic(this);
+    this.sprite.nextFrame();
+    this.view.drawGraphic(this);
   }
 }

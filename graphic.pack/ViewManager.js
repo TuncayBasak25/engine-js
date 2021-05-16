@@ -1,17 +1,17 @@
-import Canvas from engine;
+import View from engine.graphic;
 
 class ViewManager {
-  static layerList = [];
+  static viewList = [];
 
   static generate(number) {
-    for (let i of new Array(number)) LayerManager.layerList.push(new Canvas);
+    for (let i of new Array(number)) ViewManager.viewList.push(new View);
   }
 
   static get(i) {
-    return LayerManager.layerList[i];
+    return ViewManager.viewList[i];
   }
 
   static clearAll() {
-    for (let layer of LayerManager.layerList) !layer.manualClear && layer.clear();
+    for (let view of ViewManager.viewList) !view.manualClear && view.clear();
   }
 }

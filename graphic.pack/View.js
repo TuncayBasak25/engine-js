@@ -1,6 +1,24 @@
 import Vector from engine.util;
-import window.size from constants;
-import gameScreen from engine;
+
+Object.defineProperty(window, 'size', { get: () => new Vector(window.innerWidth, window.innerHeight) });
+
+document.body.innerHTML = '';
+document.body.style.padding = 0;
+document.body.style.margin = 0;
+
+window.oncontextmenu = () => false;
+
+const appScreen = document.createElement('div');
+
+appScreen.style.width = window.size.x + 'px';
+appScreen.style.height = window.size.y + 'px';
+
+appScreen.style.position = 'absolute';
+appScreen.style.overflow = 'hidden';
+
+document.body.appendChild(appScreen);
+
+window.appScreen = appScreen;
 
 class View {
   constructor(size = window.size, offset = new Vector(0,0)) {
@@ -8,7 +26,7 @@ class View {
     this.offset = offset;
 
     this.element = document.createElement('canvas');
-    gameScreen.appendChild(this.element);
+    window.appScreen.appendChild(this.element);
 
     this.element.width = this.size.x;
     this.element.height = this.size.y;
@@ -48,7 +66,7 @@ class View {
     return this;
   }
 
-  text(text, pos) {
+  drawText(text, pos) {
     this.context.font = '48px serif';
     this.context.fillText(text, pos.x, pos.y);
     return this;
@@ -57,7 +75,7 @@ class View {
   drawGraphic(graphic) {
     const { context } = this;
     const { image } = graphic.sprite;
-    const { pos, offset, scale, origin, rotation } = sprite.graph;
+    const { pos, offset, scale, origin, rotation } = graphic;
 
     context.setTransform(scale.x, 0, 0, scale.y, pos.x + offset.x, pos.y + offset.y); // sets scales and origin
     context.rotate(rotation);
@@ -122,4 +140,5 @@ class View {
   set fillStyle(value) {
     this.context.fillStyle = value;
   }
+
 }

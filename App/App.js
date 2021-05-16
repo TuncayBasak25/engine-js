@@ -1,11 +1,22 @@
+import init from engine;
+
 import Mouse, Keyboard, refreshInputs from engine.inputs;
 import Vector from engine.util;
 
-import Entity from engine;
+import EntityManager from engine;
+import ViewManager from engine.graphic;
 
 class App {
   static frames = 0;
+
+  static spf = 0;
   static fps = 0;
+
+  static delta = 0;
+  static deltaList = [];
+  static deltaAccumulator = 0;
+
+  static startTime = 0;
 
   static isRunning = false;
 
@@ -24,11 +35,19 @@ class App {
   static loop() {
     const endTime = (new Date).getTime();
 
-    const delta = (endTime - this.startTime) / 1000;
+    const delta = (endTime - this.startTime);
 
-    this.fps = Math.floor(1/delta);
+    this.deltaList.push(delta);
 
-    // if (this.frames % this.fps === 0) console.log(this.fps);
+    this.deltaAccumulator += delta;
+
+    if (this.deltaList.length === 100) this.deltaAccumulator -= this.deltaList.shift();
+
+    this.delta = this.deltaAccumulator / this.deltaList.length;
+    this.fps = Math.round(1000/this.delta);
+    this.spf = this.delta/1000;
+
+    //if (this.frames % 120 === 0) console.log(this.delta);
 
     this.startTime = (new Date).getTime();
 
@@ -42,6 +61,8 @@ class App {
   }
 
   static nextFrame() {
+    ViewManager.clearAll();
+
     const { key, keyUp, keyDown, onMouse } = this.events;
 
     const { begin, middle, end } = this.works;
@@ -72,17 +93,23 @@ class App {
       for (let i=0; i<func.length; i++) func[i]();
     }
 
-    //Update Entity
-    for (let entity of Object.values(Entity.instances)) {
+    //Update EntityManager
+    for (let entity of Object.values(EntityManager.instances)) {
+      for (let method of Object.keys(entity.listenMethods)) entity[method]();
+    }
+
+    for (let entity of Object.values(EntityManager.instances)) {
+      entity.beforeUpdate();
       for (let method of Object.keys(entity.updateMethods)) entity[method]();
+      entity.afterUpdate();
     }
 
     for (let i=0; i<middle.length; i++) middle[i]();
 
     for (let i=0; i<end.length; i++) end[i]();
 
-    //Draw Entity
-    for (let entity of Object.values(Entity.instances)) {
+    //Draw EntityManager
+    for (let entity of Object.values(EntityManager.instances)) {
       for (let method of Object.keys(entity.drawMethods)) entity[method]();
     }
   }
@@ -112,20 +139,4 @@ class App {
   }
 }
 
-Object.defineProperty(window, 'size', { get: () => new Vector(window.innerWidth, window.InnerHeight) });
-
-document.body.innerHTML = '';
-document.body.style.padding = 0;
-document.body.style.margin = 0;
-
-window.oncontextmenu = () => false;
-
-const gameScreen = document.createElement('div');
-
-gameScreen.style.width = windowSize.x + 'px';
-gameScreen.style.height = windowSize.y + 'px';
-
-gameScreen.style.position = 'absolute';
-gameScreen.style.overflow = 'hidden';
-
-document.body.appendChild(gameScreen);
+Mouse.App = App;
